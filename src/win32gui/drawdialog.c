@@ -1211,7 +1211,7 @@ transferPointlistToGeomStruct (Geometrydata * gd, POINTLIST * pointlist)
 //   gd->pointsize1 = ((gd->nFPoints*(gd->maxFixedPointsPerFixedLine+1))+gd->nLPoints+gd->nMPoints+gd->nHPoints+1)+1; //Diabled by Roozbeh
   gd->pointsize1 = numpoints + 1;       //Added By Roozbeh
   gd->pointsize2 = 9;
-  gd->points = DoubMat2DGetMem (gd->pointsize1, gd->pointsize2);
+  gd->points = DoubMat2DGetMem (gd->pointsize1, gd->pointsize2); 
 
   /* Massive kludgery here induced by the way that the 
    * points are ordered in the points array.  The order

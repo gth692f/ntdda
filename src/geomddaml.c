@@ -855,9 +855,18 @@ transferPointlistToGeomStruct(Geometrydata * gd,
    gd->nPoints = gd->nFPoints + gd->nMPoints + gd->nLPoints + gd->nHPoints;
 
   /* Horrible horrible kludge. */
-	 	n5 =  (gd->nFPoints*(gd->maxFixedPointsPerFixedLine+1))+gd->nLPoints+gd->nMPoints+gd->nHPoints+1;
+  	 	n5 =  (gd->nFPoints*(gd->maxFixedPointsPerFixedLine+1))+gd->nLPoints+gd->nMPoints+gd->nHPoints+1;
 
-	 	gd->pointsize1=n5+1;
+  /* WEM: Alas, making the kludgery worse.  This will say that up to 1000 max points are allowed 
+  (fixed, hole or measure) could have it throw something, so that it's backward compatible with more than
+  1000 points...*/
+		if (n5 > 1000){
+	 		gd->pointsize1 = n5+1;
+			//dda_display_warning("More than 1000 points, fluid flow not allowed");
+		}/*if*/
+		else
+			gd->pointsize1 = 1000;
+
 	 	/* gid->pointsize2=5; */
    /* gid->pointsize2 = 7; */ /* Add x, y displacement values per ts. */
    //gd->pointsize2 = 9;  /* add cum disp in [][7] and [][8]  */
@@ -1140,7 +1149,6 @@ ddaml_read_geometry_file(void * userdata, char *filename) {
    xmlNodePtr cur;
 
    xmlNode *root_element = NULL;
-
 
    Geometrydata * gd = (Geometrydata *)userdata;
 

@@ -31,6 +31,7 @@ struct _dda_tag  {
 
    Geometrydata * geometry;
    Analysisdata * analysis;
+   Fluidsdata * fluids;
    Filepaths * filepaths;
    int menu_state;
 
@@ -135,6 +136,16 @@ dda_get_geometrydata(DDA * dda){
 void 
 dda_set_geometrydata(DDA * dda, Geometrydata * gd) {
    dda->geometry = gd;
+}
+
+Fluidsdata * 
+dda_get_fluidsdata(DDA * dda){ 
+   return dda->fluids;
+}
+
+void 
+dda_set_fluidsdata(DDA * dda, Fluidsdata * fd) {
+   dda->fluids = fd;
 }
 
 DDA *

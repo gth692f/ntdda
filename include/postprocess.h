@@ -50,8 +50,10 @@ void writeAllBlockVerticesMatrix(Geometrydata *, Analysisdata *);
 
 void writeBoltMatrix(Geometrydata *, Analysisdata *);
 
-
 void writeBlockStresses(double ** e0, int block);
+
+void writeHeads(Fluidsdata *, Analysisdata *);
+void writePipes(Fluidsdata *, Analysisdata *);
 
 /* FIXME: Derive a testing interface for the numerical scheme,
  * and a matlab subsystem for this interface.

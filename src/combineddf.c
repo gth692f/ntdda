@@ -527,10 +527,17 @@ computeSpringStiffness(Geometrydata *gd, Analysisdata *ad, int **m0, double **o)
       b2=b1;
   /* If the value is too low... */
    //if (b2 <= (ad->g0)/3.0)  
-   if (b2 <= (ad->contactpenalty)/3.0)  
+   if (b2 <= (ad->contactpenalty)/1.2)  
      /* then bump it up it a bit. */
       //b2 = (ad->g0)/3.0;
-      b2 = (ad->contactpenalty)/3.0;
+      b2 = (ad->contactpenalty)/1.2;
+
+  /*WEM the denominator in the above two lines was originally a 3.0,
+   which resulted in incredibly low penalty values (ie, <10000 in
+   the Kim, Amadei and Pan benchmark problem, and was allowing them to 
+   deform too far...
+  */
+
 
   /* Now reset the spring stiffness parameter for use 
    * elsewhere in the program.
@@ -539,6 +546,10 @@ computeSpringStiffness(Geometrydata *gd, Analysisdata *ad, int **m0, double **o)
    //assert(b2 <= 10e9);
 
    ad->contactpenalty = b2;	
+
+   if (ad->contactpenalty <= (ad->materialProps[1][2]*5))
+	   ad->contactpenalty = ad->materialProps[1][2]*5;
+
 
   /* The minimum scaled penetration is used in parameter
    * checking of open-close iteration, and for adaptively
@@ -1049,6 +1060,8 @@ setFrictionForces(Analysisdata * ad, Contacts * c,
 
 
   /* FIXME: What is this all about? */
+  /* WEM: In other places, this signifies that a tensile lock
+  is on...*/
    if (locks[contact][0]==1)  
       e11=cohesion;
    else 
@@ -1331,6 +1344,10 @@ void df18(Geometrydata * gd, Analysisdata *ad, Contacts * ctacts,
   /* For each contact */
    for (contact=1; contact<= nContacts; contact++)
    {
+
+      if (contact == 72 || contact == 165)
+		  contact = contact;
+
       if (ad->gravityflag == 1)
          setGravForces(ad,ctacts,contact);
 
@@ -1435,6 +1452,7 @@ void df18(Geometrydata * gd, Analysisdata *ad, Contacts * ctacts,
         /* Length of ref line.  This should be the denominator of 
          * Eq. 4.12, p. 157, Shi 1988.
          */
+
          reflinelength = sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2));
         /* s1 is twice the area of a triangle formed by the 
          * directed area of the endpoints of the vertex and the 
@@ -1500,6 +1518,7 @@ void df18(Geometrydata * gd, Analysisdata *ad, Contacts * ctacts,
         /* p1 terms      s01-s06 i normal s13-s18 i shear */
         /* i0 is the block number */
          blocknumber=i1;
+
         /* getDisplacement computes, essentially returns t for
          * the ith vertex.
          */
@@ -1956,6 +1975,7 @@ df22(Geometrydata *gd, Analysisdata *ad, Contacts * ctacts, int *k1,
    * may be more than 1 per pair of blocks.
    */
   /* open-close record transfer  */
+
    for (contact=1; contact<= nContacts; contact++)
    { 
      /* Transfer the open close info.  The info from the 
@@ -1982,6 +2002,7 @@ df22(Geometrydata *gd, Analysisdata *ad, Contacts * ctacts, int *k1,
     */
    for (contact=1; contact<= nContacts; contact++)
    {
+
      /* i1 is the type of contact, takes the value 0 for 
       * vertex-edge or 1 for vertex-vertex.
       */
@@ -2048,11 +2069,17 @@ df22(Geometrydata *gd, Analysisdata *ad, Contacts * ctacts, int *k1,
          y2 = qq[2][2];
          x3 = qq[3][1];
          y3 = qq[3][2];
-         
+
+		 if ((fabs(x1-42.0) <= 0.01 && fabs(y1-50.0) <= 0.01) &&
+			 (fabs(x2-42.0) <= 0.01 && fabs(y2-50.0) <= 0.01) &&
+			 (fabs(x1-42.0) <= 0.01 && fabs(y3-48.0) <= 0.01))
+			 x1 = x1;
+       
         /* a1 is original length of ref line. FIXME: There should be a 
          * way to store this instead of having to recompute
          * it here every time we are in openclose iteration.
          */
+
          reflinelength  = sqrt((x3-x2)*(x3-x2)+(y3-y2)*(y3-y2));  // was a1
         /* S0: Original det of contact area. S0 < 0 means penetration during 
          * previous open-close iteration.
@@ -2212,16 +2239,23 @@ df22(Geometrydata *gd, Analysisdata *ad, Contacts * ctacts, int *k1,
       else if ((CTYPE == VE) || (locks[contact][PREVIOUS] == locks[contact][CURRENT]) )
       { 
          e1 = 0;
+
+		/*WEM added, since tensile strength is nowhere else set to 1,
+			 and a positive determinant signifies that the blocks aren't interpenetrating,
+			 but that the normal of one is moving away from the other*/
+         //if (c_length[contact][PENDIST] > 0 && CTYPE == VE) 
+		 	//locks[contact][TENSILE] = 1;
+
          if (locks[contact][TENSILE]==1 && CTYPE == VE)  
            /* FIXME: Figure out when joint normal spring is set, 
-            * the move the dereference up.
+            * then move the dereference up.
             * FIXME: Check units on these values to ensure consistency.  tstrength 
             * must be given in units of stress.
             */
             e1 = tstrength/(ad->JointNormalSpring);
 
         /* opencriteria was f0 */
-         if (c_length[contact][PENDIST] >   e1 + opencriteria*domainscale)  
+         if (c_length[contact][PENDIST] >   e1  + opencriteria*domainscale)  
            /* FIXME: Where was this initialized? */
             locks[contact][CURRENT]  = OPEN;
       }
@@ -2336,6 +2370,7 @@ df22(Geometrydata *gd, Analysisdata *ad, Contacts * ctacts, int *k1,
       //y4 = (1 - ratio)*p[2][2] + ratio*p[3][2];
 
      /* FIXME: Add more comments */
+	  /* TCK 1995 eqn 56 */
       x0 = (1 - omega)*x2 + omega*x3;
       y0 = (1 - omega)*y2 + omega*y3;
      /* Delta (???) contact point coords due to displacement increment.
@@ -2347,11 +2382,14 @@ df22(Geometrydata *gd, Analysisdata *ad, Contacts * ctacts, int *k1,
      /* Perpendicular offset of (x1,y1) from the line through (x0,y0)
       * perpendicular to the old ref line.
       */
+	  /* TCK 1995 first part of eqn 58 (before division by l)*/
       s1  = (x1-x0)*(x3-x2) + (y1-y0)*(y3-y2);
      /* contribution to perp offset from displacement of pt 1 */
       s1 += (p[1][1]-x4)*(x3-x2) + (p[1][2]-y4)*(y3-y2);
      /* contribution to perp offset from displacement of ref line endpoints */
       s1 += (x1-x0)*(p[3][1]-p[2][1]) + (y1-y0)*(p[3][2]-p[2][2]);
+
+	  /*TCK 1995, s1 in its final form equals the s in equation 57c, times */
 
      /* direction of shear displacement from previous iteration */
       prev_shear_direction = sign(c_length[contact][1]);
@@ -2361,6 +2399,7 @@ df22(Geometrydata *gd, Analysisdata *ad, Contacts * ctacts, int *k1,
      /* curr_shear_length seems to be between -1 and 1.
       */
       curr_shear_length  = s1/reflinelength;
+	  /* equals s from TCK 1995, eqn 57c */ 
       //fprintf(fp.logfile,"curr_shear_length: %f\n", curr_shear_length);
 
      /* Shear displacement or movement, value in [-1,1] (???) */
@@ -2391,6 +2430,13 @@ df22(Geometrydata *gd, Analysisdata *ad, Contacts * ctacts, int *k1,
   */
   //fprintf(fp.logfile,"locks[contact][CURRENT]: %d\n",locks[contact][CURRENT]);
 
+
+	  		 if ((fabs(x1-42.0) <= 0.01 && fabs(y1-50.0) <= 0.01) &&
+			 (fabs(x2-42.0) <= 0.01 && fabs(y2-50.0) <= 0.01) &&
+			 (fabs(x1-42.0) <= 0.01 && fabs(y3-48.0) <= 0.01))
+			 x1 = x1;
+
+
       /* cases: open lock inherit-slide reverse-slide   */
       /* locks[][2]=1 is previously set for all cases   */
       if (locks[contact][PREVIOUS] == OPEN) 
@@ -2410,8 +2456,14 @@ df22(Geometrydata *gd, Analysisdata *ad, Contacts * ctacts, int *k1,
          * works, possibly gets divided out.
          */
         /* FIXME: Why is there no cohesion or tension forces in the 
-         * this case?
+         * this case? WEM: Perhaps because this represents the residual
+		 * shear strength, as opposed to the peak shear strength before
+		 * the joints break.  Since the previous case was open, the joints 
+		 * would already have surpassed their cohesive strength, which no 
+		 * longer should offer resistance. 
          */
+
+		 /*WEM: Added cohesion into this function as a test*/
          if (fabs(c_length[contact][1]) < fabs(tanphi*c_length[contact][0]))  
             locks[contact][CURRENT] = LOCKED;
          continue; //goto c207;
@@ -2425,7 +2477,8 @@ df22(Geometrydata *gd, Analysisdata *ad, Contacts * ctacts, int *k1,
          * supposedly tension, but here is associated with 
          * cohesion value???
          */
-         if (locks[contact][TENSILE] == 1)  
+
+		 if (locks[contact][TENSILE] == 1) 
             e1 = cohesion/(ad->JointNormalSpring);
 
         /* if no penetration, no normal force */
@@ -2789,7 +2842,12 @@ df25(Geometrydata *gd, Analysisdata *ad, int *k1,
 
          U[i][j+6] = U[i][j];
          U[i][j] = F[i1][j];
+
       } 
+
+	  if (i % 12 == 7 || i % 12 == 8 )
+		  i = i;
+
    }  
 
   /* For each measured point, save the current location,

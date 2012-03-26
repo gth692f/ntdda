@@ -265,7 +265,7 @@ computeVertexAngles(double **angles, double ** vertices,
         /* We use an assert to catch any problems that might
          * pop up because of angles close to +- 90.
          */
-         assert( d1 >= 0 && d1 <= 360);
+         assert( d1 >= 0 && d1 <= 360); /*WEM, need to do something about this assert */
          if ( d1 <= 0  && d1 >= 360)
          {
             /* FIXME: Deal with errorfiles somehow, maybe pass an open
@@ -1375,6 +1375,10 @@ setInitialLocks(Geometrydata * gd, Analysisdata * ad, int **contacts,
 
    for (contact=1; contact<= nContacts; contact++)
    {
+
+      if (contact == 72 || contact == 165)
+		  contact = contact;
+
       if (locks[contact][CURRENT] != LOCKED)  
          locks[contact][CURRENT] = 1;
 

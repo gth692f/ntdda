@@ -121,6 +121,11 @@ struct _geo_data_tag {
    int matlinesize2;
    double ** matlines;
 
+   //int pipesize1;
+   //int pipesize2;
+   //int nPSegments;
+   //double ** pipeSegments;
+
   /*------------------------------------------------*/
   /* h: x1  y1  x2  y2  n1  n2  e0  t0  f0  of bolt */
 	 /* n1 n2 carry block number        f0 pre-tension */

@@ -220,6 +220,14 @@ openAnalysisFiles(Filepaths * filepath) {
    strcpy(filepath->fpointfile, temp);
 
    strcpy(temp, outdir);
+   strcat(temp, "_heads.m");
+   strcpy(filepath->headfile, temp);
+
+   strcpy(temp, outdir);
+   strcat(temp, "_pipes.m");
+   strcpy(filepath->pipefile, temp);
+
+   strcpy(temp, outdir);
    strcat(temp, "_cforce.m");
    strcpy(filepath->cforce, temp);
 
@@ -297,6 +305,8 @@ openAnalysisFiles(Filepaths * filepath) {
    fp.htmlfile = fopen(filepath->htmlfile, "w");
    fp.datafile = fopen(filepath->datafile, "w");
    fp.fpointfile = fopen(filepath->fpointfile, "w");
+   fp.headfile = fopen(filepath->headfile, "w");
+   fp.pipefile = fopen(filepath->pipefile, "w");
 
    fp.boltfile = fopen(filepath->boltfile, "w");
    fp.boltlogfile = fopen(filepath->boltlogfile, "w");
@@ -356,6 +366,8 @@ closeAnalysisFiles() {
    fclose(fp.htmlfile);
    fclose(fp.datafile);
    fclose(fp.fpointfile);
+   fclose(fp.headfile);
+   fclose(fp.pipefile);
    fclose(fp.boltfile);
    fclose(fp.boltlogfile);
    fclose(fp.vertexfile);

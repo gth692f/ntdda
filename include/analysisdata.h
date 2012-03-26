@@ -67,6 +67,7 @@ struct _analysisdata_tag {
    */
    ddaboolean rotationflag;
    ddaboolean gravityflag;
+   ddaboolean pipeflowflag;
    ddaboolean autotimestepflag;
    ddaboolean autopenaltyflag;
    ddaboolean planestrainflag;

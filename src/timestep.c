@@ -390,11 +390,12 @@ timeintegration(Geometrydata * gd, Analysisdata * ad,
  * returns the preset time step.
  */
 void 
-computeTimeStep(Geometrydata *bd, Analysisdata *ad)
+computeTimeStep(Geometrydata *bd, Analysisdata *ad, Fluidsdata *fd)
 {
    int i;
    int j;
-   int point;  /* Loop over number of points.  */
+   int point, node;  /* Loop over number of points and pipe nodes.  */
+   double pressure_force; /*force from fluid pressure at each node */
                /* Scratch variables used for intermediate calculations
                 * for computing the delta_t size.
                 */
@@ -549,7 +550,17 @@ computeTimeStep(Geometrydata *bd, Analysisdata *ad)
             a3=fabs(points[point][4]);
          if (a3 < fabs(points[point][5])) 
             a3=fabs(points[point][5]);
+
       }  /*  i  */
+
+	  /*pipe flow on, so maximum force could be from a pressure */
+	  if (ad->pipeflowflag == 1){
+		  for (node = 1; node <= fd->nNodes; node++){
+			  pressure_force = fd->pressures[node]*2*domainscale; 
+			  if(a3 < pressure_force)
+				  a3 = pressure_force;
+		  }
+	  }
      /* normalize the maximum point load */ 
       a3 = a3/(avgArea*materialProps[1][0]);
       //a1 = w6*w0*(ad->g7)/(avgArea*materialProps[1][0]);
@@ -562,7 +573,10 @@ computeTimeStep(Geometrydata *bd, Analysisdata *ad)
       //the globalTime[ad->cts-1][1] term which is displacement ratio  
 	  //has been changed to cumulative time (globalTime[ad->cts-1][0])
 	  //by Roozbeh
-      a2 = globalTime[ad->cts-1][0]*maxdisplacement*domainscale/(ad->delta_t); // Changed by Roozbeh
+      //a2 = globalTime[ad->cts-1][0]*maxdisplacement*domainscale/(ad->delta_t); // Changed by Roozbeh
+	  /*changed back by WEM, ising the Roozbeh formulation was driving the ad->delta_t in 
+	  at least one of my examples to zero and causing it to crash.*/
+	  a2 = globalTime[ad->cts-1][1]*maxdisplacement*domainscale/(ad->delta_t);
 
       if (analysisType == STATIC) /* analysisType == 0  is static type analysis, */
          a2=0;
@@ -596,7 +610,13 @@ computeTimeStep(Geometrydata *bd, Analysisdata *ad)
       else //if ( a9 >= 1.3*(ad->delta_t)) 
          ad->delta_t=1.3*(ad->delta_t);
 
+	  /*WEM added this to keep ad->delta_t from going to zero, 
+	  previously there was nothing stopping it.  Just took the 
+	  code from the checkParameters function */
+       if(ad->delta_t < ad->maxtimestep/100.0)
+		ad->delta_t = ad->maxtimestep/100.0;
+
    }  /* end past first time step */
-   
+
 }  /* Close computeTimeStep() */
 

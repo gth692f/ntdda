@@ -230,6 +230,8 @@
 #include "datalog.h"
 #include "bolt.h"
 #include "material.h"
+#include "pipes.h"
+#include "fluidsdriver.h"
 
 
 
@@ -244,6 +246,8 @@ ddanalysis(DDA * dda, Filepaths * filepath) {
 
    Geometrydata * GData = dda_get_geometrydata(dda);
    Analysisdata * AData = dda_get_analysisdata(dda);
+   Fluidsdata * FData; /*only included as an option, 
+					   retrieved later on in the code */
 
   /** Maximum vertex displacement current time step. */
    double md_cts;
@@ -325,6 +329,25 @@ ddanalysis(DDA * dda, Filepaths * filepath) {
    */
    int **n;
 
+   /*Declaring pipe flow matrices and what not for use
+   in the solution.  If no pipe network, just ignore them*/
+
+   /*Initialize pipe and node network */
+   if(AData->pipeflowflag == 1){
+	   FData = dda_get_fluidsdata(dda);
+	   producePipeSegments(GData, FData);
+	   produceNodes(GData,FData);
+	   initializePipeProperties(GData, FData);
+	   /*adjustPipeMeasurePoints(GData, FData); 
+	   not currently implemented, maybe
+	   and go out this past in and see if it's needed later*/
+
+	   initFluidMatrices(FData, GData);
+	   /*Calculate Pressures at each node for initial 
+	   distribution*/
+	   calcPressures(FData, GData, AData);
+   }/* if */
+
 
    /** This will of course need to be moved into a more 
     * appropriate place.
@@ -360,19 +383,21 @@ ddanalysis(DDA * dda, Filepaths * filepath) {
  * compile control because I want to deal with it asap.  And 
  * I want to get rid of compilecontrol asap.
  */
-   //adata_set_output_flag(AData, VERTICES);
-   //adata_set_output_flag(AData, FIXEDPOINTS);
+
+   /*Marked with //o were originally commented WEM*/
+   adata_set_output_flag(AData, VERTICES); //o
+   adata_set_output_flag(AData, FIXEDPOINTS); //o
    adata_set_output_flag(AData, MEASPOINTS);
-   //adata_set_output_flag(AData, SOLUTIONVECTOR);
-   //adata_set_output_flag(AData, BLOCKSTRESSES);
-   //adata_set_output_flag(AData, PENALTYFORCES);
-   //adata_set_output_flag(AData, FRICTIONFORCES);
+   adata_set_output_flag(AData, SOLUTIONVECTOR); //o
+   //adata_set_output_flag(AData, BLOCKSTRESSES); //o
+   adata_set_output_flag(AData, PENALTYFORCES); //o 
+   adata_set_output_flag(AData, FRICTIONFORCES); //o
    adata_set_output_flag(AData, BOLTS);
   /* FIXME: This is a horrible bogosity: moments need to 
    * be written from the geometry data, not the analysis
    * data.  
    */
-   //adata_set_output_flag(AData, MOMENTS);
+   adata_set_output_flag(AData, MOMENTS); //o
 
   /* Allocating arrays in a function removes lots of superfluous
    * code.  Most of this function will disappear in the future.
@@ -397,7 +422,7 @@ ddanalysis(DDA * dda, Filepaths * filepath) {
    display(GData, AData);
 
   /* Check to see how the forces look. */
-   //printForces(GData, AData->F, k1, "Before main loop");
+  //printForces(GData, AData->F, k1, "Before main loop");
       
 /* All this stuff gets put elsewhere at some point in the 
  * future.
@@ -430,10 +455,24 @@ ddanalysis(DDA * dda, Filepaths * filepath) {
   /* START THE MAIN ANALYSIS LOOP STEPPING OVER TIME */
    for (AData->cts=1; AData->cts<=AData->nTimeSteps; AData->cts++) {
 
+	/* perform fluid geometry and pressure distribution calculations.
+	The fluid data is initialized above this area, with user-specified 
+	pipe widths assigned initially */
+
+	   if(AData->pipeflowflag == 1){
+		   if (AData->cts != 1){
+			   calcPipeWidths(GData, FData);
+			   calcPressures(FData, GData, AData);
+		   }/*if AData->cts != 1*/
+	   }/* if pipeflowflag */
+
+     if (AData->cts == 36)
+		 AData->cts = AData->cts;
+
      /* Compute the size of the next time step.
       * FIXME :Give a precis how it it works.
       */
-      computeTimeStep(GData,AData); 
+      computeTimeStep(GData,AData,FData); 
      /* Contains subfunctions df04, df05, df06, df07.
       * Contact finding takes a list of blocks, finds the 
       * number of vertex-vertex (v-v) or vertex-edge (v-e) contacts 
@@ -448,6 +487,7 @@ ddanalysis(DDA * dda, Filepaths * filepath) {
       * here, being used to temporarily store inside and outside
       * angles at each vertex.
       */
+
       findContacts(GData,AData, CTacts, kk,k1,n,c0);
       //printContactLengths(GData, contactlength, "From main loop");
 
@@ -497,7 +537,7 @@ ddanalysis(DDA * dda, Filepaths * filepath) {
          * in df18() (?).  The analysis is in Shi 1988, Chapter 2,
          * pp. 60-96.  df10()-df16() are called from assemble().
          */
-         assemble(GData,AData,get_locks(CTacts),e0,k1,kk,n,U,transmap);
+         assemble(GData,AData,get_locks(CTacts),e0,k1,kk,n,U,transmap,FData);
 
         /* The "classical" DDA derived in GHS 1988 used a forward
          * difference formulation to integrate over time.  This 
@@ -633,7 +673,7 @@ ddanalysis(DDA * dda, Filepaths * filepath) {
 	     writeBoltMatrix(GData, AData);
       }  
 
-#if 0
+#if 1 //Changed from 0 to 1 WEM
 	   if (AData->options & VERTICES && AData->verticesflag) {
 	      for (counter = 1; counter <= GData->nBlocks; counter++) {
 			   writeBlockVerticesLog(GData, AData->cts, counter);
@@ -647,9 +687,20 @@ ddanalysis(DDA * dda, Filepaths * filepath) {
          checkGravityConvergence(AData->gravity, GData, AData);
       }
 
+	  if (AData->pipeflowflag == 1){
+		  writeHeads(FData,AData);
+		  writePipes(FData,AData);
+	  }
 
-     /* Draw some stuff to the screen. */ 
+
+
+     /* Draw some stuff to the screen. */   
       display(GData, AData);
+
+	  /*if(AData->cts % 10 == 0)
+		display(GData,AData);*/
+
+	  //Sleep(5); 
 
    } /* END OF MAIN ANALYSIS LOOP  */
 
@@ -697,6 +748,11 @@ ddanalysis(DDA * dda, Filepaths * filepath) {
   /* Keep this as the last function call so that there will 
    * no ambiguity about which files are open.  
    */
+
+   /*WEM: putting this here temporarily, since I don't know where it
+   should go*/
+   FData->free;
+
    closeAnalysisFiles();   
 
   /** @brief Eventually, this will return a struct that points at various parts of the

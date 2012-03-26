@@ -798,7 +798,7 @@ mary: ;/* I am going to rewrite this later anyway.  Just
         * change the 0 to 1 to get the code back for now
         * when you need it.
         */
-#if 0
+#if 1 //Changed from 0 to 1 WEM
 	  if (!ad->verticesflag) {
 	     block = (int) gd->points[i][3];
 		  writeBlockVerticesLog(gd, ad->cts, block);
@@ -887,6 +887,141 @@ writeFixedPoints(Geometrydata * gd, Analysisdata * ad)
 
 }  /* close writeFixedPoints() */
 
+void
+writeHeads(Fluidsdata *fd, Analysisdata *ad)
+{
+   int node_i;
+         
+   double xpos, ypos, hydraulic_head, pressure_head;
+
+  /* This will declare the variable name in matlab or 
+   * octave.
+   */
+   char headerstring[] = {"\n%% (x,y) of node, hydraulic head, pressure head\n\n"
+                          "Heads%d=[\n"};  // Comma is for ^%#@!^%^#@! Excel importing
+  /* After all the data for the array is written,
+   * that is, at the last time step, close the array
+   * with matlab array bracket delimiters.
+   */
+   static char trailerstring[] = {"];\n"};    
+
+   if(ad->cts == 1){
+	   fprintf(fp.headfile, headerstring, ad->cts);
+	   for (node_i=1; node_i<=fd->nNodes; node_i++)
+	   {
+		  xpos = fd->nodes[node_i][1];
+		  ypos = fd->nodes[node_i][2];
+		  hydraulic_head = fd->heads[node_i];
+		  pressure_head = fd->pressures[node_i];
+		  fprintf(fp.headfile,"%.12f  %.12f  %.12f  %.12f\n",xpos, ypos, hydraulic_head, pressure_head);
+	   }
+	   fprintf(fp.headfile, trailerstring);
+	   fprintf(fp.headfile,"\n");
+   }
+   else if(ad->cts % ad->tsSaveInterval == 0){
+	   fprintf(fp.headfile, headerstring, ad->cts);
+	   for (node_i=1; node_i<=fd->nNodes; node_i++)
+	   {
+		  xpos = fd->nodes[node_i][1];
+		  ypos = fd->nodes[node_i][2];
+		  hydraulic_head = fd->heads[node_i];
+		  pressure_head = fd->pressures[node_i];
+		  fprintf(fp.headfile,"%.12f  %.12f  %.12f  %.12f\n",xpos, ypos, hydraulic_head, pressure_head);
+	   }
+	   fprintf(fp.headfile, trailerstring);
+	   fprintf(fp.headfile,"\n");
+   }
+   else if(ad->cts == ad->nTimeSteps){
+	   fprintf(fp.headfile, headerstring, ad->cts);
+	   for (node_i=1; node_i<=fd->nNodes; node_i++)
+	   {
+		  xpos = fd->nodes[node_i][1];
+		  ypos = fd->nodes[node_i][2];
+		  hydraulic_head = fd->heads[node_i];
+		  pressure_head = fd->pressures[node_i];
+		  fprintf(fp.headfile,"%.12f  %.12f  %.12f  %.12f\n",xpos, ypos, hydraulic_head, pressure_head);
+	   }
+	   fprintf(fp.headfile, trailerstring);
+	   fprintf(fp.headfile,"\n");
+   }
+
+}  /* close writeHeads */
+
+void
+writePipes(Fluidsdata *fd, Analysisdata *ad)
+{
+   int pipe_i;
+            
+   double x1, y1, x2, y2, pipe_width;
+   int node1, node2;
+
+  /* This will declare the variable name in matlab or 
+   * octave.
+   */
+   char headerstring[] = {"\n%% (x1, y1) and (x2, y2) of pipe, mean hydrualic radius \n\n"
+                          "Pipes%d=[\n"};  // Comma is for ^%#@!^%^#@! Excel importing
+  /* After all the data for the array is written,
+   * that is, at the last time step, close the array
+   * with matlab array bracket delimiters.
+   */
+   static char trailerstring[] = {"];\n"};    
+
+   if(ad->cts == 1){
+	   fprintf(fp.pipefile, headerstring, ad->cts);
+	   for (pipe_i=1; pipe_i<=fd->nPSegments; pipe_i++)
+	   {
+		   node1 = fd->pipeSegments[pipe_i][8];
+		   node2 = fd->pipeSegments[pipe_i][9];
+
+		   x1 = fd->nodes[node1][1];
+		   y1 = fd->nodes[node1][2];
+		   x2 = fd->nodes[node2][1];
+		   y2 = fd->nodes[node2][2];
+
+		   pipe_width = fd->pipeSegments[pipe_i][5];
+		  fprintf(fp.pipefile,"%.12f  %.12f  %.12f  %.12f %.12f\n",x1, y1, x2, y2, pipe_width);
+	   }
+	   fprintf(fp.pipefile, trailerstring);
+	   fprintf(fp.pipefile,"\n");
+   }
+   else if(ad->cts % ad->tsSaveInterval == 0){
+	   fprintf(fp.pipefile, headerstring, ad->cts);
+	   for (pipe_i=1; pipe_i<=fd->nPSegments; pipe_i++)
+	   {
+		   node1 = fd->pipeSegments[pipe_i][8];
+		   node2 = fd->pipeSegments[pipe_i][9];
+
+		   x1 = fd->nodes[node1][1];
+		   y1 = fd->nodes[node1][2];
+		   x2 = fd->nodes[node2][1];
+		   y2 = fd->nodes[node2][2];
+
+		   pipe_width = fd->pipeSegments[pipe_i][5];
+		  fprintf(fp.pipefile,"%.12f  %.12f  %.12f  %.12f %.12f\n",x1, y1, x2, y2, pipe_width);
+	   }
+	   fprintf(fp.pipefile, trailerstring);
+	   fprintf(fp.pipefile,"\n");
+   }
+   else if(ad->cts == ad->nTimeSteps){
+	   fprintf(fp.pipefile, headerstring, ad->cts);
+	   for (pipe_i=1; pipe_i<=fd->nPSegments; pipe_i++)
+	   {
+		   node1 = fd->pipeSegments[pipe_i][8];
+		   node2 = fd->pipeSegments[pipe_i][9];
+
+		   x1 = fd->nodes[node1][1];
+		   y1 = fd->nodes[node1][2];
+		   x2 = fd->nodes[node2][1];
+		   y2 = fd->nodes[node2][2];
+
+		   pipe_width = fd->pipeSegments[pipe_i][5];
+		  fprintf(fp.pipefile,"%.12f  %.12f  %.12f  %.12f %.12f\n",x1, y1, x2, y2, pipe_width);
+	   }
+	   fprintf(fp.pipefile, trailerstring);
+	   fprintf(fp.pipefile,"\n");
+   }
+
+}  /* close writePipes() */
 
 void
 writeSpyfile(int ** n, int * kk, int numblocks, FILE * spyfile)

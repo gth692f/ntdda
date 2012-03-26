@@ -99,6 +99,9 @@ stress_update(double ** e0, double ** D, int * k1,
 
    for (i=1; i<= numblocks; i++) {
 
+      if (i % 12 == 7 || i %12 == 8)
+		  i = i;
+
       i1 = k1[i];
       strain_compute(D[i1], strain);
       apply_boundary_cond(e0[i], strain);

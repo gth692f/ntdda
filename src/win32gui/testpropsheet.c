@@ -367,6 +367,19 @@ AFlagsProc(HWND hDlg, UINT messageID, WPARAM wParam, LPARAM lParam)
                }
                break;
 
+			case AD_PIPEFLOW:
+               if (SendMessage(hcontrol,BM_GETCHECK,0,0) == BST_CHECKED)
+               {
+                  //ad->pipeflowflag = 1;
+                  MessageBox(hDlg,"Pipeflow checked",NULL,MB_OK);
+               }
+               else 
+               {
+                  //ad->pipeflowflag = 0;
+                  MessageBox(hDlg,"Pipeflow unchecked",NULL,MB_OK);
+               }
+            break;
+
             case AD_PSTRESS:
                //ad->planestrain = 0;
                MessageBox(hDlg,"Plane stress",NULL,MB_OK);

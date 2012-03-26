@@ -440,13 +440,12 @@ static void
 loadFromFile2(HWND hDlg)
 {
    int i;
+   gd = gdata_new();
 
    sprintf(subWinTitle, "Geometry Data: %s", filepath.gfile);
    // read in data from file blocks.out <--- (!?)
    hFile = OpenFile(filepath.gfile, &of, OF_READ);
 
-   //gd = geometryInput(gd, filepath.gfile);
-   //geometryInput(gd, filepath.gfile);
    gdata_read_input_file(gd, filepath.gfile);
 
   /* Now transfer the data to the local structs. */      
@@ -567,11 +566,11 @@ setDialogValues(HWND hDlg)
 static BOOLEAN
 saveData(HWND hDlg)
 {
+   /* This looks like it's only called from Geometry -> View/Edit text (Dialog Box) */
 
    int i;
    FILE * fp;
-
-   
+      
    LPCTSTR szFilter[] = 
       {"Geometry files (*.geo)\0*.geo\0All files (*.*)\0*.*\0\0"};
    fileBrowse(hDlg, &ofn, szFilter, filepath.gpath, filepath.gfile, "geo");

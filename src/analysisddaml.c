@@ -64,7 +64,6 @@ void transferBoltMatlistToAStruct(Analysisdata * adata, BOLTMATLIST * boltmatlis
 void transferBlockMatlistToAStruct(Analysisdata * adata, BLOCKMATLIST * blockmatlist);
 static double ** DoubMat2DGetMem(int n, int m);
 
-
 static void initializeALists(void);
 
 Analysisdata * adata;
@@ -267,6 +266,20 @@ parseRotation(xmlDocPtr doc, xmlNsPtr ns, xmlNodePtr cur)
       adata->rotationflag = 1;
    } else {
       ddaml_display_warning("Parse problem in rotation attributes");
+   }
+
+}  
+
+static void 
+parsePipeflow(xmlDocPtr doc, xmlNsPtr ns, xmlNodePtr cur) 
+{
+   fprintf(stdout,"Parsing pipeflow...\n");
+
+   if (!strcmp("yes",xmlGetProp(cur,"flag"))) {
+      adata->pipeflowflag = 1;
+   } 
+   else{
+	  adata->pipeflowflag = 0;
    }
 
 }  
@@ -957,6 +970,7 @@ KWDTAB atab_type[] = {
 {"Writevertices",  0, *parseWritevertices  },
 {"Rotation",       0, *parseRotation       },
 {"Gravity",        0, *parseGravity        },
+{"Pipeflow",       0, *parsePipeflow       },
 {"Autotimestep",   0, *parseAutotimestep   },
 {"Autopenalty",    0, *parseAutopenalty    },
 {"Analysistype",   0, *parseAnalysistype   },
@@ -1078,6 +1092,12 @@ ddaml_read_analysis_file(Analysisdata * ad, char *filename) {
   /* FIXME:  This needs to be handled as an exception to
    * protect against dereferencing a null pointer.
    */
+
+   if(cur == NULL){
+	   dda_display_warning("Error in analysis file, applying garbage values");
+	   return ;
+   };
+
    cur = cur->children;
 
    while (cur != NULL) {

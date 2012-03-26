@@ -172,6 +172,9 @@ ddacut(Geometrydata *geomdata) {
    * struct directly, and have the previous block file written 
    * as an option.
    */
+
+   
+
    returnGeom = geometryToReturn(geomdata, vindexdc, verticesdc);
 
 
@@ -189,6 +192,8 @@ ddacut(Geometrydata *geomdata) {
 
    //return returnGeom;
    geomdata = returnGeom;
+
+   
 
 }   /* Close geom()  */
 

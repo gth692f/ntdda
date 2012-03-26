@@ -18,6 +18,8 @@ extern "C" {
 
 #include "analysisdata.h"
 
+#include "fluidsdata.h"
+
 
 
 /** Find a way to get rid of this. */
@@ -93,6 +95,10 @@ Analysisdata * dda_get_analysisdata   (DDA *);
 void           dda_set_analysisdata   (DDA *, 
                                        Analysisdata * analysisdata);
 
+Fluidsdata *   dda_get_fluidsdata   (DDA *);
+void           dda_set_fluidsdata   (DDA *, 
+                                       Fluidsdata * fluidsdata);
+
 ddaboolean     dda_get_toolbarvis     (DDA *);
 void           dda_set_toolbarvis     (DDA *, 
                                        ddaboolean);
@@ -135,6 +141,9 @@ void           dda_display_error      (const char * message);
 void           dda_display_warning    (const char * message);
 
 void           dda_display_info       (const char * message);
+
+/* Prototypes for initializing fluid flow in the dda struct*/
+void initializeFData(DDA * dda, char * ffilename);
 
 #ifdef __cplusplus
 }

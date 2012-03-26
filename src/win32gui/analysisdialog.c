@@ -61,6 +61,7 @@ static int planestrain;
 static int autotimestep = 1;
 static int autopenalty = 1;
 static int numtdeps;
+static int pipeflow;
 /* The load points are an array of structs */
 static Loadpoint * lpoints;
 static Analysisdata * ad;
@@ -260,13 +261,29 @@ handleWMCommand(HWND hDlg, WPARAM wParam, LPARAM lParam)
       planestrain = 1;
       break;
 
+	  /* WEM: gravity, rotation and pipeflow adjusted, since before
+	  these weren't able to save correctly, as they couldn't be 
+	  set back to 0 in the dialog box */
    case AD_GRAVITY:
-      gravity = 1;
+	  if (gravity == 1)
+	    gravity = 0;
+	  else
+	    gravity = 1;
       break;
   
    case AD_ROTATION:
+	  if (rotation == 1)
+	    rotation = 0;
+	  else
       rotation = 1;
       break;
+
+   case AD_PIPEFLOW:
+      if (pipeflow == 1)
+	    pipeflow = 0;
+	  else
+		pipeflow = 1;
+	  break;
 
    case AD_JPLUS:
       SendMessage(hDlg, WM_COMMAND, AD_JMAT, 0L);
@@ -292,7 +309,7 @@ handleWMCommand(HWND hDlg, WPARAM wParam, LPARAM lParam)
       SetDlgItemText(hDlg, AD_TENS, temp);
       jindex = i;
 
-      break;
+	  break;
 
    case AD_TIMEDEPS:
       loadindex = (int) SendDlgItemMessage(hDlg, AD_TIMEDEPS, CB_GETCURSEL, 0, 0L);
@@ -666,10 +683,11 @@ loadFileData(HWND hDlg, HFILE * hFile, OFSTRUCT * of)
    * the dialog box...
    */
 
-   if(ad->fileformat != ddaml) {
+  /*WEM: commented this out, since it seems to say it every time, even if a ddaml file*/
+  /* if(ad->fileformat != ddaml) {
       MessageBox(hDlg,"Analysis interface only supports\n the Berkeley DDAML input format.","Error",MB_OK);
       //SendMessage(hDlg,WM_QUITDIALOG,0,0);
-   }
+   } */
 
 
    ///fp = fopen(filepath.afile, "r");
@@ -690,6 +708,7 @@ loadFileData(HWND hDlg, HFILE * hFile, OFSTRUCT * of)
 
    rotation = ad->rotationflag;
    gravity = ad->gravityflag;
+   pipeflow = ad->pipeflowflag;
    planestrain = ad->planestrainflag;
    autotimestep = ad->autotimestepflag;
    autopenalty = ad->autopenaltyflag;
@@ -833,6 +852,11 @@ setDialogValues(HWND hDlg, LPARAM lParam, WPARAM wParam)
    else 
       CheckDlgButton(hDlg, AD_ROTATION, MF_UNCHECKED);
 
+   if (pipeflow) 
+      CheckDlgButton(hDlg, AD_PIPEFLOW, MF_CHECKED);
+   else 
+      CheckDlgButton(hDlg, AD_PIPEFLOW, MF_UNCHECKED);
+
   /* Analysis parameters */
    SetDlgItemInt(hDlg, AD_NTS, nts, FALSE);
    tsSaveInterval = (int) ((nts-1)/20 + 1);
@@ -952,7 +976,6 @@ saveData()
 
    fp = fopen(filepath.apath, "w");
 
-
   /* Might want to reimplement time step saving interval
    * as well.
    */
@@ -964,9 +987,11 @@ saveData()
    //ad->g2 = maxdisp;
    ad->maxdisplacement = maxdisp;
    ad->maxtimestep = .01;
+   ad->tsSaveInterval = tsSaveInterval;
 
    ad->rotationflag = rotation;
    ad->gravityflag = gravity;
+   ad->pipeflowflag = pipeflow;
    ad->planestrainflag = planestrain;
    ad->autotimestepflag = autotimestep;
    ad->autopenaltyflag = autopenalty;

@@ -1,5 +1,5 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Developer Studio generated include file.
+// Microsoft Visual C++ generated include file.
 // Used by Dda.rc
 //
 #define ICON_1                          1
@@ -185,6 +185,7 @@
 #define IDC_YL                          1085
 #define IDC_XU                          1086
 #define IDC_YU                          1087
+#define AD_PIPEFLOW                     1089
 #define IDC_LISTBOX3                    1102
 #define GD_SAVE                         1102
 #define GD_NJOI                         1103
@@ -367,6 +368,8 @@
 #define ID_POPUP_ITEM3                  40055
 #define DDAHELP_TUTORIAL                40056
 #define AD_TESTPROP                     40057
+#define AD_INITWIDTH                    40057
+#define AD_WIDTH                        40057
 #define OPTIONS_FIXEDPOINTS             40059
 #define OPTIONS_BLOCKAREAS              40060
 #define OPTIONS_MEASUREDPOINTS          40061
@@ -376,6 +379,7 @@
 #define TOOLBAR_GORIGHT                 40065
 #define TOOLBAR_GOUP                    40066
 #define TOOLBAR_GODOWN                  40067
+#define ID_GEOMETRY_TEST                40068
 #define ID_INDICATOR_MODE               59142
 #define ID_INDICATOR_GRID               59143
 #define IDC_STATIC                      -1
@@ -386,8 +390,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        176
-#define _APS_NEXT_COMMAND_VALUE         40068
-#define _APS_NEXT_CONTROL_VALUE         1088
+#define _APS_NEXT_COMMAND_VALUE         40069
+#define _APS_NEXT_CONTROL_VALUE         1090
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

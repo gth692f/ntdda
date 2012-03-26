@@ -13,6 +13,7 @@ extern "C" {
 
 typedef struct _joint Joint;
 typedef struct _jointmat Jointmat;
+typedef struct _jointprop Jointprop;
 
 
 /** @todo Change to incomplete type. */
@@ -35,6 +36,18 @@ struct _jointmat {
    double cohesion;
 	 double tension;
    int type;
+};
+
+
+
+struct _jointprop {
+  /* Need a union of structs and an 
+   * enum in here to handle the various types
+   * of friction laws.
+   */
+   double width;
+   double friction_factor;
+   int constant_width;
 };
 
 
@@ -74,6 +87,24 @@ void       joint_set_endpoints    (Joint * j,
                                    double epx2,
                                    double epy2);
 
+Jointprop * jointprop_new           (void);
+void       jointprop_delete        (Jointprop *);
+
+Jointprop * jointprop_array_new     (int numjoints);
+
+double     jointprop_get_width  (Jointprop *);
+void       jointprop_set_width  (Jointprop *,
+                                   double width);
+
+double     jointprop_get_friction_factor  (Jointprop *);
+void       jointprop_set_friction_factor  (Jointprop *,
+                                   double friction_factor);
+
+int     jointprop_get_constant_width  (Jointprop *);
+void       jointprop_set_constant_width  (Jointprop *,
+                                   int constant_width);
+
+
 /**
  * The scale factor is new_scale/old_scale.
  */
@@ -83,6 +114,9 @@ void       joint_rescale          (Joint * j,
 void       joint_print_xml        (Joint * j,
                                    PrintFunc printer,
                                    void * stream);
+
+
+
 
 #ifdef __cplusplus
 }

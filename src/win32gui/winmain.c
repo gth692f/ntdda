@@ -945,7 +945,6 @@ handleAnalBrowse(HWND hwMain, LPARAM lParam)
 
 } /* close handleAnalBrowse() */
 
-
 static int 
 handleAnalRun(HWND hwMain) {
 
@@ -971,6 +970,20 @@ handleAnalRun(HWND hwMain) {
    ad->display_warning = dda_display_warning;
    dda_set_analysisdata(dda,ad);
    adata_read_input_file(ad,filepath.afile,0,0,0);
+
+   /*check if pipe flow is turned on, and if so, intialize the Fluiddata struct*/
+   if (ad->pipeflowflag){
+      OPENFILENAME ofn;    
+
+	  LPCTSTR szFilter[] = {"Fluid files (*.fld)\0*.fld\0All files (*.*)\0*.*\0\0"};
+
+	   fileBrowse(hwMain, &ofn, szFilter, filepath.fpath, filepath.ffile, "fld");
+	   if( !GetOpenFileName(&ofn) ) 
+	   {
+			return 0;  // user pressed cancel
+	   } 
+	   initializeFData(dda,filepath.ffile);
+   };/*if*/
 
    /* So I really need to grab the analysis struct before calling
     * so that all the initialization can be done...  

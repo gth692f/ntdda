@@ -223,7 +223,8 @@ void findContacts(Geometrydata * GData, Analysisdata * AData,
 
 void assemble(Geometrydata * GData, Analysisdata * AData,
             int ** locks, double ** e0, int * k1, int * kk,
-            /* double ** moments, */int ** n, double ** U, TransMap transmap);
+            /* double ** moments, */int ** n, double ** U, TransMap transmap,
+			Fluidsdata * FData);
 
 void timeintegration(Geometrydata * GData, 
                      Analysisdata * AData,

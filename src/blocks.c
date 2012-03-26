@@ -1506,7 +1506,7 @@ void dc10(Geometrydata *gd, int ** vindex, double ** vertices)
    for ( i=(gd->nFPoints+gd->nLPoints+gd->nMPoints+gd->nHPoints); i >= 1; i-- )
    {
       points[i+i1][0] = points[i][0];  /* added 8/9/95 */
-		    points[i+i1][1] = points[i][1];
+	  points[i+i1][1] = points[i][1];
       points[i+i1][2] = points[i][2];
       points[i+i1][3] = points[i][3];
       points[i+i1][4] = points[i][4];
@@ -2971,7 +2971,4 @@ allocateGeometryArrays(Geometrydata * gd, int *** aa, int *** k, int *** r,
   *verticesdc = DoubMat2DGetMem(__vertexsize1, __vertexsize2);
 
 }  /* close allocateGeometryArrays() */
-
-
-
 

@@ -49,7 +49,6 @@ jointmat_new (void) {
    return jm;
 }
 
-
 /** @todo Use a linked list here instead of an array. */
 Jointmat *
 jointmat_array_new (int numjoints) {
@@ -130,6 +129,53 @@ joint_print_xml (Joint * j, PrintFunc printer, void * stream) {
       printer(stream," %14.10f %14.10f %14.10f %14.10f ",
               j->epx1, j->epy1, j->epx2, j->epy2);
       printer(stream,"</Joint>\n");
+}
+
+Jointprop * 
+jointprop_new (void) {
+
+   Jointprop * jp = (Jointprop*)malloc(sizeof(Jointprop));
+   memset(jp,0x0,sizeof(Jointprop));
+   return jp;
+}
+
+double     
+jointprop_get_width   (Jointprop * jp) {
+
+   return jp->width;
+}
+
+
+void       
+jointprop_set_width (Jointprop * jp, double width) {
+
+   jp->width = width;
+}
+
+double     
+jointprop_get_friction_factor   (Jointprop * jp) {
+
+   return jp->friction_factor;
+}
+
+
+void       
+jointprop_set_friction_factor (Jointprop * jp, double friction_factor) {
+
+   jp->friction_factor = friction_factor;
+}
+
+int     
+jointprop_get_constant_width   (Jointprop * jp) {
+
+	return jp->constant_width;
+}
+
+
+void       
+jointprop_set_constant_width (Jointprop * jp, int constant_width) {
+
+	jp->constant_width = constant_width;
 }
 
 #ifdef __cplusplus

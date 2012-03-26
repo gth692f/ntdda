@@ -129,15 +129,18 @@ adata_write_ddaml(Analysisdata * ad, PrintFunc printer, void * outfile) {
    printer(outfile,"<Analysis type=\"%s\">\n\n",attribute);
    printer(outfile,I1"<Analysistype type=\"%s\"/>\n",attribute);
 
-   switch (ad->rotationtype)
+   /*WEM: changed this to write on rotation flag, using the 0-1 parameter
+   that currently get written in the main file*/
+   switch (ad->rotationflag)
    {
-      case linear:
+      case 0:
          strcpy(attribute,"linear");
          break;
-      case secondorder:
+      /*commented out for now, since "secondorder" is being implemented as exact*/
+      /*case secondorder:
          strcpy(attribute,"secondorder");
-         break;
-      case exact:
+         break;*/
+      case 1:
          strcpy(attribute,"exact");
          break;
       default:
@@ -155,6 +158,12 @@ adata_write_ddaml(Analysisdata * ad, PrintFunc printer, void * outfile) {
    printer(outfile,I1"<Gravity flag=\"%s\">\n",attribute);
    printer(outfile,I1"Gravity parameters are currently hardwired.\n");
    printer(outfile,I1"</Gravity>\n\n");
+
+   if (ad->pipeflowflag == 0)
+	   strcpy(attribute,"no");
+   else
+	   strcpy(attribute,"yes");
+   printer(outfile,I1"<Pipeflow flag=\"%s\"/>\n",attribute);
 
    if (ad->autotimestepflag == 0)
       strcpy(attribute,"no");

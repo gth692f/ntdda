@@ -615,6 +615,26 @@
 					</FileConfiguration>
 				</File>
 			</Filter>
+			<Filter
+				Name="fluids"
+				>
+				<File
+					RelativePath=".\src\fluidsdata.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\fluidsddaml.c"
+					>
+				</File>
+				<File
+					RelativePath=".\src\fluidsdriver.c"
+					>
+				</File>
+				<File
+					RelativePath=".\pipes.c"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="gui"
@@ -1264,6 +1284,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\src\gausselimination.c"
+				>
 			</File>
 			<File
 				RelativePath="src\gravity.c"
@@ -1921,6 +1945,14 @@
 		</File>
 		<File
 			RelativePath="include\ddafile.h"
+			>
+		</File>
+		<File
+			RelativePath=".\resources\destroy.ico"
+			>
+		</File>
+		<File
+			RelativePath=".\include\fluidsdata.h"
 			>
 		</File>
 		<File
