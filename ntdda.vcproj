@@ -631,7 +631,7 @@
 					>
 				</File>
 				<File
-					RelativePath=".\pipes.c"
+					RelativePath=".\src\pipes.c"
 					>
 				</File>
 			</Filter>
